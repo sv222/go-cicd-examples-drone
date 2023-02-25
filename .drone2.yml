@@ -1,0 +1,52 @@
+kind: pipeline
+type: docker
+name: build-test-deploy
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: golang:1.16
+  commands:
+  - go build -o myapp
+
+- name: test
+  image: golang:1.20
+  commands:
+  - go test ./...
+
+- name: deploy-staging
+  image: docker
+  settings:
+    registry: myregistry.com
+    repo: myapp
+    tags:
+    - ${DRONE_COMMIT_SHA}
+    - latest
+  environment:
+    DOCKER_USERNAME:
+      from_secret: docker_username
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+  when:
+    event:
+    - pull_request
+
+- name: deploy-production
+  image: docker
+  settings:
+    registry: myregistry.com
+    repo: myapp
+    tags:
+    - ${DRONE_COMMIT_SHA}
+    - latest
+  environment:
+    DOCKER_USERNAME:
+      from_secret: docker_username
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+  when:
+    branch:
+    - main

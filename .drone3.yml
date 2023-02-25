@@ -1,0 +1,43 @@
+kind: pipeline
+type: docker
+name: build-and-deploy-on-git-tag
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: golang:1.20
+  commands:
+  - go build -o myapp
+
+- name: docker-build
+  image: docker
+  commands:
+  - docker build -t myregistry.com/myapp:${DRONE_TAG} .
+  environment:
+    DOCKER_USERNAME:
+      from_secret: docker_username
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+  when:
+    event:
+    - tag
+
+- name: deploy-production
+  image: docker
+  settings:
+    registry: myregistry.com
+    repo: myapp
+    tags:
+    - ${DRONE_TAG}
+    - latest
+  environment:
+    DOCKER_USERNAME:
+      from_secret: docker_username
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+  when:
+    event:
+    - tag
