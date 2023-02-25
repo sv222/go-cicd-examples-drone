@@ -1,2 +1,5 @@
+# Linguist overrides
+!*.yaml linguist-detectable=false
+!*.yml linguist-detectable=false
 *.yml linguist-language=YAML
 * linguist-vendored
