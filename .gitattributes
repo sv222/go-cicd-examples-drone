@@ -4,9 +4,7 @@
 # Enable language detection for YAML files
 *.yml linguist-detectable=true
 *.yaml linguist-detectable=true
-*.drone*.yml linguist-detectable=true
 
 # Set YAML files to be treated as YAML
 *.yml linguist-language=YAML
 *.yaml linguist-language=YAML
-*.drone*.yml linguist-language=YAML
