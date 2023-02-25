@@ -1,13 +1,14 @@
 # Build stage
-FROM golang:1.17.2-alpine AS build
+FROM golang:1.20-alpine3.17 AS build
 WORKDIR /app
 COPY . .
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o my-go-app .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
-# Production stage
-FROM alpine:3.15.2
-RUN apk --no-cache add ca-certificates
-WORKDIR /root/
-COPY --from=build /app/my-go-app .
-CMD ["./my-go-app"]
+# Final stage
+FROM alpine:3.17
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+WORKDIR /app
+COPY --from=build /app/app .
+CMD ["./app"]
